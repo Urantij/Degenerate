@@ -3,5 +3,6 @@
 
 oppm register Urantij/Degenerate
 
-oppm install agri-robot
-oppm install agri-computer
+oppm install agri-robot ""
+
+oppm install agri-computer ""
