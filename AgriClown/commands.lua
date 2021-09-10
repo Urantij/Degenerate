@@ -40,15 +40,17 @@ function Command.MakeSearchFunc(itemId)
 	end
 end
 
-function Command.FindRobotStack(controller, checkFunc, startIndex)
+function Command.FindRobotStack(controller, checkFunc, startIndex, longSearch)
 
 	local size = controller.robotComponent.inventorySize()
 	
+  local cycleChange = longSearch and -1 or 1
+  
 	if (startIndex == nil) then
-		startIndex = 1
+		startIndex = longSearch and size or 1
 	end
 	
-	for i = startIndex, size, 1 do
+	for i = startIndex, size, cycleChange do
 		
 		local stack = controller.inventory_controller.getStackInInternalSlot(i)
 		
@@ -60,24 +62,32 @@ function Command.FindRobotStack(controller, checkFunc, startIndex)
 	return nil, nil
 end
 
-function Command.FindIterStack(controller, checkFunc)
+function Command.FindIterStack(controller, checkFunc, longSearch)
 
 	local iterator = controller.inventory_controller.getAllStacks(sides.front)
 
-	local stack = iterator()
-	local index = 1
-	
-	while (stack ~= nil) do
+  local index = 1
+	local stack = iterator()  
+  
+  local resultIndex = nil
+  local resultStack = nil
+    
+  while (stack ~= nil) do
+    
+    if (checkFunc(stack)) then
+      resultIndex = index
+      resultStack = stack
+      
+      if (not longSearch) then
+        break
+      end
+    end
+    
+    stack = iterator()
+    index = index + 1
+  end
 		
-		if (checkFunc(stack)) then
-			return index, stack
-		end
-		
-		stack = iterator()
-		index = index + 1
-	end
-	
-	return nil, nil
+	return resultIndex, resultStack
 end
 
 function Command.SetDefaults(obj)
@@ -209,7 +219,7 @@ function ResuplyCommand:process(controller)
 		--Ищем стак у робота
 		local robotItemIndex, robotItemStack = Command.FindRobotStack(controller, checkFunc, searchIndex)
 		--Ищем стак в сундуке
-		local chestItemIndex, chestItemStack = Command.FindIterStack(controller, checkFunc)
+		local chestItemIndex, chestItemStack = Command.FindIterStack(controller, checkFunc, true)
 		
 		if (chestItemIndex == nil) then
 			--В сундуке нет суплаев, мы проиграли.
@@ -323,7 +333,7 @@ function UseCommand:process(controller)
 
 	local checkFunc = Command.MakeSearchFunc(self.args.item)
 	
-	local itemIndex, itemStack = Command.FindRobotStack(controller, checkFunc)
+	local itemIndex, itemStack = Command.FindRobotStack(controller, checkFunc, nil, true)
 	
 	if (itemIndex == nil) then
 		self.finish = true
@@ -360,7 +370,7 @@ function UseDownCommand:process(controller)
 
 	local checkFunc = Command.MakeSearchFunc(self.args.item)
 	
-	local itemIndex, itemStack = Command.FindRobotStack(controller, checkFunc)
+	local itemIndex, itemStack = Command.FindRobotStack(controller, checkFunc, nil, true)
 	
 	if (itemIndex == nil) then
 		self.finish = true

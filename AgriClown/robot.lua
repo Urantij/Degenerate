@@ -4,6 +4,7 @@ robot = require("robot")
 component = require("component")
 event = require("event")
 fs = require("filesystem")
+keyboard = require("keyboard")
 
 common_knowledge = require("commonknowledge")
 commandsReq = require("commands")
@@ -121,22 +122,9 @@ end
 function process()
 	
 	robotComponent.setLightColor(execColor)
-	while (true) do
+	while (#state.commands > 0) do
 		
 		if (state.current == nil) then
-			
-			if (#state.commands == 0) then
-			
-				printD("Finished process")
-				
-				robotComponent.setLightColor(waitColor)
-				
-				state = nil
-				redstone.setOutput(sides.bottom, 1)
-				redstone.setOutput(sides.bottom, 0)
-				return
-			end
-		
 			state.current = table.remove(state.commands, 1)
 		end
 		
@@ -155,8 +143,18 @@ function process()
 		if (state.current.finish) then
 			printD("Finish command...")
 			state.current = nil
+    else
+      return
 		end
 	end
+  
+  printD("Finished process")
+				
+  robotComponent.setLightColor(waitColor)
+  
+  state = nil
+  redstone.setOutput(sides.bottom, 1)
+  redstone.setOutput(sides.bottom, 0)
 end
 
 function processRedstoneCallback(newValue, dontIgnore)
@@ -190,8 +188,7 @@ function processRedstoneCallback(newValue, dontIgnore)
 		state.ignoreNextRedstone = true
 		
 		printD("redstoneCallback, gonna have " .. tostring(newValue) .. " commands")
-	else
-		if (state.current == nil) then
+	elseif (state.current == nil) then
 			
 			local CommandClass = commandsReq.commandsDict[newValue]
 			
@@ -205,17 +202,17 @@ function processRedstoneCallback(newValue, dontIgnore)
 			else
 				state.current = command
 			end
-		else
-			
-			state.current:read(newValue)
-			
-			--printD("Reading command, .ready is " .. tostring(state.current.ready))
-			
-			if (state.current.ready) then
-				table.insert(state.commands, state.current)
-				state.current = nil
-			end
-		end	
+		
+  else
+    
+      state.current:read(newValue)
+      
+      --printD("Reading command, .ready is " .. tostring(state.current.ready))
+      
+      if (state.current.ready) then
+        table.insert(state.commands, state.current)
+        state.current = nil
+      end
 	end
 	
 	if (#state.commands == state.commandsCount) then
