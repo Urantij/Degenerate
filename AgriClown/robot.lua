@@ -38,9 +38,9 @@ controller.robot = robot
 controller.robotComponent = robotComponent
 controller.inventory_controller = component.inventory_controller
 
-local waitColor = 0x0000FF
-local readColor = 0x00FF00
-local execColor = 0xFF0000
+local waitColor = 0x00FF00
+local readColor = 0xFF0000
+local execColor = 0x0000FF
 
 --state.commandsCount how many commands are queued
 --state.commands commands queue
