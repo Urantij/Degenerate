@@ -42,15 +42,13 @@ end
 
 function Command.FindRobotStack(controller, checkFunc, startIndex, longSearch)
 
-	local size = controller.robotComponent.inventorySize()
-	
-  local cycleChange = longSearch and -1 or 1
+  local inventorySize = controller.robotComponent.inventorySize()
   
-	if (startIndex == nil) then
-		startIndex = longSearch and size or 1
-	end
+  local cycleStart = startIndex or longSearch and inventorySize or 1
+  local cycleChange = longSearch and -1 or 1
+  local cycleLimit = longSearch and 1 or inventorySize
 	
-	for i = startIndex, size, cycleChange do
+	for i = cycleStart, cycleLimit, cycleChange do
 		
 		local stack = controller.inventory_controller.getStackInInternalSlot(i)
 		
