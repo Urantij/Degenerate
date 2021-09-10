@@ -53,6 +53,19 @@ local locationInfo = {}
 locationInfo.pos = common_knowledge.poses.middle
 locationInfo.turn = common_knowledge.turns.front
 
+function controller.tryExecuteRobot(func)
+    
+    local executed = false
+    while (not executed) do
+			executed = func()
+			
+			if (not executed) then
+				computer.beep()
+				os.sleep(1)
+      end
+    end
+end
+
 --this function command robot to take specific pos and turn
 function controller.moveRobot(pos, turn)
 	
@@ -76,15 +89,9 @@ function controller.moveRobot(pos, turn)
 		end
 		
 		while (movePoints > 0) do
-			local moved = controller.robot.forward()
+			controller.tryExecuteRobot(controller.robot.forward)
 			
-			if (moved) then
-				movePoints = movePoints - 1
-			else
-				
-				computer.beep()
-				os.sleep(1)
-			end
+			movePoints = movePoints - 1
 		end
 		
 		locationInfo.pos = pos

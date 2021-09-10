@@ -380,13 +380,13 @@ function UseDownCommand:process(controller)
 	controller.robot.select(itemIndex)
 	controller.inventory_controller.equip()
 	
-	controller.robot.up()
-	controller.robot.forward()
+	controller.tryExecuteRobot(controller.robot.up)
+	controller.tryExecuteRobot(controller.robot.forward)
 	
 	controller.robot.useDown(sides.bottom)
 	
-	controller.robot.back()
-	controller.robot.down()
+	controller.tryExecuteRobot(controller.robot.back)
+	controller.tryExecuteRobot(controller.robot.down)
 	
 	controller.inventory_controller.equip()
 	controller.robot.select(selectedIndex)
